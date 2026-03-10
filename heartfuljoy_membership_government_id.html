@@ -1,0 +1,190 @@
+<!DOCTYPE html><html>
+<head><title>Heartful Joy Community Membership Card</title><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script><style>
+
+body{
+font-family:Arial;
+text-align:center;
+background:#f2f2f2;
+padding-top:40px;
+}
+
+input{
+padding:10px;
+width:320px;
+font-size:16px;
+margin:10px;
+}
+
+button{
+padding:10px 20px;
+font-size:16px;
+font-weight:900;
+margin:10px;
+}
+
+.previewCard{
+
+width:360px;
+height:220px;
+
+margin:auto;
+margin-top:20px;
+
+border:4px solid black;
+border-radius:10px;
+
+background:linear-gradient(#FFD9A0,#FFFFFF,#D4F5D4);
+
+padding:15px;
+
+text-align:left;
+
+}
+
+.previewCard h3{
+margin:0;
+font-weight:900;
+color:#000;
+}
+
+.previewCard h4{
+margin:3px 0;
+font-weight:900;
+color:#000;
+}
+
+.previewCard p{
+margin:4px 0;
+font-weight:900;
+color:#000;
+}
+
+#qrPreview{
+position:absolute;
+right:20px;
+bottom:20px;
+}
+
+</style></head><body><h2>Heartful Joy Community Membership Card</h2><input type="text" id="name" placeholder="Enter Member Name"><br><button onclick="generate()">Generate Card</button>
+
+<button onclick="downloadPDF()">Download PDF</button>
+
+<div class="previewCard" id="card"><h3>Heartful Joy Community</h3>
+<h4>Official Membership Identity</h4><hr><p>Name : <span id="pname">---</span></p><p>Membership ID : <span id="pid">---</span></p><p>Status : <span id="pstatus">---</span></p><p>Date of Issue : <span id="pdate">---</span></p><canvas id="qrPreview"></canvas>
+
+</div><script>
+
+/* MEMBER DATABASE */
+
+const members={
+
+"UBBARAPU VENKATA GEETHA CHARAN":{id:"HFJ-0001",status:"Permanent Member"},
+"PUTTANEEDI JAIDEEP VENKATA SAI":{id:"HFJ-0002",status:"Permanent Member"},
+"PUTTANEEDI HARSHITHA":{id:"HFJ-0003",status:"Permanent Member"},
+"VALISETTY JAYALAKSHMI":{id:"HFJ-0004",status:"Permanent Member"},
+"KOTTE CHARANYA":{id:"HFJ-0005",status:"Permanent Member"},
+"KOTTE DINESH VENKATA SAI":{id:"HFJ-0006",status:"Permanent Member"},
+"KOTTE SARITHA":{id:"HFJ-0007",status:"Permanent Member"},
+"PUTTANEEDI RUPA DEVI":{id:"HFJ-0008",status:"Permanent Member"},
+"MARUBOINA LOHITHA":{id:"HFJ-0009",status:"Permanent Member"},
+"MARUBOINA LEELAVATHI":{id:"HFJ-0010",status:"Permanent Member"},
+"BADANABOINA UMA DEVI":{id:"HFJ-0011",status:"Permanent Member"},
+"PUTTANEEDI KOTESWARAMMA":{id:"HFJ-0012",status:"Permanent Member"},
+"VALISETTY VIJAYADURGA":{id:"HFJ-0013",status:"Temporarily Approved"}
+
+};
+
+let currentMember=null;
+
+function generate(){
+
+let name=document.getElementById("name").value.trim().toUpperCase();
+
+if(members[name]){
+
+currentMember=members[name];
+
+document.getElementById("pname").innerText=name;
+document.getElementById("pid").innerText=currentMember.id;
+document.getElementById("pstatus").innerText=currentMember.status;
+document.getElementById("pdate").innerText=new Date().toLocaleDateString();
+
+/* QR preview */
+
+new QRious({
+element:document.getElementById("qrPreview"),
+value:currentMember.id,
+size:80
+});
+
+}
+
+else{
+
+alert("Member Not Found");
+
+}
+
+}
+
+function downloadPDF(){
+
+if(!currentMember){
+alert("Generate card first");
+return;
+}
+
+const { jsPDF } = window.jspdf;
+
+const pdf=new jsPDF({
+orientation:"landscape",
+unit:"mm",
+format:[85.6,54]  /* Real ID card size */
+});
+
+/* Border */
+
+pdf.setLineWidth(1);
+pdf.rect(2,2,81.6,50);
+
+/* Header */
+
+pdf.setFont("helvetica","bold");
+pdf.setFontSize(12);
+
+pdf.text("Heartful Joy Community",10,10);
+
+pdf.setFontSize(10);
+pdf.text("Official Membership Identity",10,15);
+
+/* Details */
+
+pdf.setFontSize(9);
+
+pdf.text("Name : "+document.getElementById("pname").innerText,10,25);
+pdf.text("Membership ID : "+currentMember.id,10,30);
+pdf.text("Status : "+currentMember.status,10,35);
+pdf.text("Date : "+new Date().toLocaleDateString(),10,40);
+
+/* QR Code */
+
+let qrCanvas=document.createElement("canvas");
+
+new QRious({
+element:qrCanvas,
+value:currentMember.id,
+size:100
+});
+
+let qrImage=qrCanvas.toDataURL("image/png");
+
+pdf.addImage(qrImage,"PNG",60,20,20,20);
+
+/* SAVE */
+
+pdf.save(currentMember.id+"_membership_card.pdf");
+
+}
+
+</script></body>
+</html>
